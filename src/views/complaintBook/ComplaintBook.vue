@@ -62,7 +62,7 @@
                   <CFormLabel>Sucursal *</CFormLabel>
                   <CFormSelect
                     v-model="form.branch_id"
-                    :options="branches"
+                    :options="branchesOptions"
                     :disabled="isBranchLocked"
                   >
                   </CFormSelect>
@@ -130,6 +130,7 @@ const typeIngresoOptions = [
   { value: "reclamo", label: "Reclamo" },
 ];
 
+const branchesOptions = ref([]);
 const branches = ref([]);
 const categoriesOptions = ref([]);
 const isBranchLocked = ref(false);
@@ -150,8 +151,6 @@ const resetForm = () => {
 };
 
 const handleSubmit = async () => {
-  console.log(form);
-
   if (
     !form.name ||
     !form.email ||
@@ -169,7 +168,7 @@ const handleSubmit = async () => {
     });
     return;
   }
-
+  let branch_id = branches.value.find(branch => branch.coddep == form.branch_id);
   const formData = new FormData();
   formData.append("name", form.name);
   formData.append("email", form.email);
@@ -177,7 +176,7 @@ const handleSubmit = async () => {
   formData.append("phone", form.phone);
   formData.append("entryType", form.entryType);
   formData.append("category_id", form.category_id);
-  formData.append("branch_id", form.branch_id);
+  formData.append("branch_id", branch_id.id);
   formData.append("client_description", form.description);
 
   if (form.files) {
@@ -186,7 +185,7 @@ const handleSubmit = async () => {
 
   try {
     const response = await fetch(
-      `${url}/api/webLuquin/complaintBook/saveComplaint`,
+      `${url}/api/complaintBook/saveComplaint`,
       {
         method: "POST",
         body: formData,
@@ -217,9 +216,11 @@ const handleSubmit = async () => {
 const loadFormData = async () => {
   try {
     const response = await fetch(
-      `${url}/api/webLuquin/complaintBook/getFormData`
+      `${url}/api/complaintBook/getFormData`
     );
     const data = await response.json();
+
+    branches.value = data.branches;
 
     const matchedBranch = data.branches.find(
       (branch) => String(branch.coddep) === props.codsuc
@@ -230,7 +231,7 @@ const loadFormData = async () => {
       return;
     }
 
-    branches.value = data.branches.map((branch) => ({
+    branchesOptions.value = data.branches.map((branch) => ({
       value: branch.coddep,
       label: branch.coddep + "-" + branch.name,
     }));
