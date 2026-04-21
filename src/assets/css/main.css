@@ -1,0 +1,28 @@
+:root {
+    /* Colores principales */
+    --color-primary: #687980;
+    --color-secondary: #1AA4D6;
+    --color-alert: #FF2125;
+    --color-background: #F6F4F4;
+    --color-btn: #AAAAAA;
+    --color-btn-active: #1AA4D6;
+    --custom-img-select: url('/src/assets/icons/select.svg');
+}
+
+* {
+    font-family: 'Satoshi-Variable';
+    font-weight: 400;
+    line-height: 22px;
+    letter-spacing: 0em;
+    text-align: left;
+}
+
+.color_primary {
+    color: var(--color-primary);
+}
+.color_secondary {
+    color: var(--color-secondary) !important;
+}
+.color_alert {
+    color: var(--color-alert) !important;
+}
