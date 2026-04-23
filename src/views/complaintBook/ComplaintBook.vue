@@ -335,7 +335,7 @@
           class="success-modal__button"
           @click="showSuccessModal = false"
         >
-          Número de caso: #{{ successCaseCode }} 
+          Número de caso: #{{ successCaseCode }}
         </CButton>
       </div>
     </div>
@@ -517,14 +517,13 @@ const handleSubmit = async () => {
     });
     return;
   }
-
   const formData = new FormData();
   formData.append("name", form.name);
   formData.append("email", form.email);
   formData.append("dni", form.dni);
   formData.append("phone", form.phone);
   formData.append("category_id", form.category_id);
-  formData.append("branch_id", selectedBranch.id);
+  formData.append("branch_id", selectedBranch.coddep);
   formData.append("client_description", form.description);
 
   if (form.files) {
@@ -559,21 +558,26 @@ const handleSubmit = async () => {
 };
 
 const loadFormData = async () => {
+  isSubmitting.value = true;
+
   try {
-    const response = await fetch(`${url}/api/complaintBook/getFormData`);
-    const data = await response.json();
-
-    branches.value = data.branches;
-
-    const matchedBranch = data.branches.find(
-      (branch) => String(branch.coddep) === props.codsuc
+    const response = await fetch(
+      `${url}/api/complaintBook/getFormData?codsuc=${props.codsuc}`
     );
-
-    if (props.codsuc && !matchedBranch) {
+    const data = await response.json();
+    if (data.status == 404) {
       router.replace("/404");
       return;
     }
 
+    branches.value = data.branches;
+    const matchedBranch = data.branches.find(
+      (branch) => String(branch.coddep) === props.codsuc
+    );
+    if (props.codsuc && !matchedBranch) {
+      router.replace("/404");
+      return;
+    }
     branchesOptions.value = data.branches.map((branch) => ({
       value: branch.coddep,
       label: branch.coddep + "-" + branch.name,
@@ -593,8 +597,15 @@ const loadFormData = async () => {
       form.branch_id = matchedBranch.coddep;
       isBranchLocked.value = true;
     }
+    isSubmitting.value = false;
   } catch (err) {
     console.log(err);
+    await Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: "Ocurrió un error. Por favor, vuelve a intentarlo más tarde.",
+      showConfirmButton: false,
+    });
   }
 };
 
@@ -772,8 +783,8 @@ onBeforeMount(async () => {
   border: none;
   border-radius: 1rem;
   border: 1px solid var(--color-secondary) !important;
-  background-color: #fff ;
-  color: var(--color-secondary) ;
+  background-color: #fff;
+  color: var(--color-secondary);
   font-weight: 700;
 }
 
@@ -814,8 +825,4 @@ onBeforeMount(async () => {
     transform: rotate(360deg);
   }
 }
-
-
-
-
 </style>
